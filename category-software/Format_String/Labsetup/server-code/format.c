@@ -13,12 +13,11 @@
 #define BUF_SIZE 100
 #endif
 
-
 #if __x86_64__
-  unsigned long target = 0x1122334455667788;
+unsigned long target = 0x1122334455667788;
 #else
-  unsigned int  target = 0x11223344;
-#endif 
+unsigned int target = 0x11223344;
+#endif
 
 char *secret = "A secret message\n";
 
@@ -29,45 +28,44 @@ void myprintf(char *msg)
 #if __x86_64__
     unsigned long int *framep;
     // Save the rbp value into framep
-    asm("movq %%rbp, %0" : "=r" (framep));
-    printf("Frame Pointer (inside myprintf):      0x%.16lx\n", (unsigned long) framep);
+    asm("movq %%rbp, %0" : "=r"(framep));
+    printf("Frame Pointer (inside myprintf):      0x%.16lx\n", (unsigned long)framep);
     printf("The target variable's value (before): 0x%.16lx\n", target);
+
 #else
     unsigned int *framep;
     // Save the ebp value into framep
     asm("movl %%ebp, %0" : "=r"(framep));
-    printf("Frame Pointer (inside myprintf):      0x%.8x\n", (unsigned int) framep);
-    printf("The target variable's value (before): 0x%.8x\n",   target);
+    printf("Frame Pointer (inside myprintf):      0x%.8x\n", (unsigned int)framep);
+    printf("The target variable's value (before): 0x%.8x\n", target);
+    printf("The return address (before): 0x%.8x\n", (unsigned)(&*framep + 4));
 #endif
-
     // This line has a format-string vulnerability
     printf(msg);
 
 #if __x86_64__
     printf("The target variable's value (after):  0x%.16lx\n", target);
 #else
-    printf("The target variable's value (after):  0x%.8x\n",   target);
+    printf("The target variable's value (after):  0x%.8x\n", target);
+    printf("The return address (after): 0x%.8x\n", (unsigned)(&*framep + 4));
 #endif
-
 }
-
 
 int main(int argc, char **argv)
 {
     char buf[1500];
 
-
 #if __x86_64__
-    printf("The input buffer's address:    0x%.16lx\n", (unsigned long) buf);
-    printf("The secret message's address:  0x%.16lx\n", (unsigned long) secret);
-    printf("The target variable's address: 0x%.16lx\n", (unsigned long) &target);
+    printf("The input buffer's address:    0x%.16lx\n", (unsigned long)buf);
+    printf("The secret message's address:  0x%.16lx\n", (unsigned long)secret);
+    printf("The target variable's address: 0x%.16lx\n", (unsigned long)&target);
 #else
-    printf("The input buffer's address:    0x%.8x\n",   (unsigned int)  buf);
-    printf("The secret message's address:  0x%.8x\n",   (unsigned int)  secret);
-    printf("The target variable's address: 0x%.8x\n",   (unsigned int)  &target);
+    printf("The input buffer's address:    0x%.8x\n", (unsigned int)buf);
+    printf("The secret message's address:  0x%.8x\n", (unsigned int)secret);
+    printf("The target variable's address: 0x%.8x\n", (unsigned int)&target);
 #endif
 
-    printf("Waiting for user input ......\n"); 
+    printf("Waiting for user input ......\n");
     int length = fread(buf, sizeof(char), 1500, stdin);
     printf("Received %d bytes.\n", length);
 
@@ -78,7 +76,7 @@ int main(int argc, char **argv)
 }
 
 // This function is used to insert a stack frame between main and myprintf.
-// The size of the frame can be adjusted at the compilation time. 
+// The size of the frame can be adjusted at the compilation time.
 // The function itself does not do anything.
 void dummy_function(char *str)
 {
@@ -87,4 +85,3 @@ void dummy_function(char *str)
 
     myprintf(str);
 }
-

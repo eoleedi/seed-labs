@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 
 /* Changing this size will change the layout of the stack.
  * Instructors can change this value each year, so students
@@ -22,24 +23,24 @@ int bof(char *str)
     return 1;
 }
 
-int main(int argc, char **argv)
-{
-    char str[517];
-    FILE *badfile;
+// int main(int argc, char **argv)
+// {
+//     char str[517];
+//     FILE *badfile;
 
-    badfile = fopen("badfile", "r");
-    if (!badfile)
-    {
-        perror("Opening badfile");
-        exit(1);
-    }
+//     badfile = fopen("badfile", "r");
+//     if (!badfile)
+//     {
+//         perror("Opening badfile");
+//         exit(1);
+//     }
 
-    int length = fread(str, sizeof(char), 517, badfile);
-    printf("Input size: %d\n", length);
-    dummy_function(str);
-    fprintf(stdout, "==== Returned Properly ====\n");
-    return 1;
-}
+//     int length = fread(str, sizeof(char), 517, badfile);
+//     printf("Input size: %d\n", length);
+//     dummy_function(str);
+//     fprintf(stdout, "==== Returned Properly ====\n");
+//     return 1;
+// }
 
 // This function is used to insert a stack frame of size
 // 1000 (approximately) between main's and bof's stack frames.
@@ -49,4 +50,10 @@ void dummy_function(char *str)
     char dummy_buffer[1000];
     memset(dummy_buffer, 0, 1000);
     bof(str);
+}
+
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size)
+{
+    dummy_function((char *)Data);
+    return 0; // Values other than 0 and -1 are reserved for future use.
 }
