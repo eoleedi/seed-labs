@@ -1,111 +1,82 @@
-# Lab Setup for Apple Silicon Machines
+# Building SEED VM for Apple Silicon Machines
 
-## Local Setup for Apple Silicon Machines [For Web Security Labs]
+As more and more people are using Apple machines with M1/M2
+chips (Apple Silicon), it becomes important to provide 
+a virtual machine for students to conduct the SEED labs 
+on their person computer (we used to ask them to
+do the labs the cloud). In this project, we are building 
+a virtual machine for the Apple Silicon machine. 
+We document the design choices, progress and the encountered 
+issues in this project. 
 
-Note: This method is only tested for the web security labs with Labsetup for arm version.
 
-For this we are assuming that you have docker setup in your machine. If you don't have docker setup in your machine, please follow the instructions from [here](https://docs.docker.com/desktop/mac/install/).
+## Choosing the Virtual Machine Software 
 
-### Step 1: Install Homebrew
-To install Homebrew, open the terminal and run the following command.
+It does not seem that VirtualBox will allow us to run
+Linux on top of Apple Silicon machines (M1/M2) any time soon.
+Other than the cloud approach, we should start looking at
+other approaches. There are two possible virtualization
+products:
 
-```/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"```
+- Parallel: this one is not free.
+- VMWare Fusion Player: this one is free. We choose to use this software.
 
-If after installing homebrew you are not able to access brew, run the following command in the terminal.
 
-```echo 'eval $(/opt/homebrew/bin/brew shellenv)' >> ~/.zprofile```
+## Building the SEED VM on Fusion
 
-```eval $(/opt/homebrew/bin/brew shellenv)```
 
-### Step 2: Install ```docker-mac-net-connect``` using Homebrew
-This is required to connect the docker container to the host network. To install docker-mac-net-connect, open the terminal and run the following command.
+Step 1: Build an Ubuntu VM on VMWare Fusion. 
+We could not find the ARM version of Ubuntu 20.04, so we will install
+Ubuntu 22.04 instead. A detailed instruction is provided 
+in [seedvm-fusion.md](./seedvm-fusion.md).
 
-```brew install chipmk/tap/docker-mac-net-connect```
 
-And then start the service using the following command.
+Step 2: Install software inside the VM. This step is the same 
+as the Step 2 in the 
+[cloud VM manual](https://github.com/seed-labs/seed-labs/blob/master/manuals/cloud/seedvm-cloud.md).
+Here are some notes: 
 
-```sudo brew services start chipmk/tap/docker-mac-net-connect```
-
-## VMware Fusion Player Setup for Apple Silicon Machines
-
-### Step 1: Install VMware Fusion Player on Apple Silicon Machines
-
-Go to [VMware Fusion](https://customerconnect.vmware.com/en/evalcenter?p=fusion-player-personal-13) and register for a free Fusion Player license. Then under License & Download, click on `Manually Download`.
-
-![VMware Fusion Player](Figs/vmware-fusion-player-web.png)
-
-Installation is straight forward. Download the dmg file manually from the link provided in the installation page. Double click on the dmg file and follow the instructions.
-
-After the installation is finished, you can start the VMware Fusion Player. You will be asked to enter your license key which will be there on the installation page.
-
-After you have entered the license key, you will be asked to allow the kernel extensions. Click on `Open Security Preferences`.
-
-In the Security & Privacy settings, click on `Allow` to allow the kernel extensions.
-
-### Step 2: Install Ubuntu on VMware Fusion Player
-
-Now we have to download the Ubuntu ISO image. Go to [Ubuntu 22.04.3](https://cdimage.ubuntu.com/jammy/daily-live/current/) and download the Ubuntu 22.04.3 LTS (Jammy Jellyfish) Daily Build. Make sure you download the `64-bit ARM (ARMv8/AArch64) desktop image`.
-
-![Ubuntu ISO](Figs/ubuntu-iso.png)
-
-After the download is finished, start the VMware Fusion Player. Click on `Create a New Virtual Machine`.
-
-Now in Select the Installation Method, select `Install from disc or image` and click on `Continue`.
-
-![VMware Fusion Player Create New Virtual Machine](Figs/vmware-fusion-player-create-new-virtual-machine.png)
-
-Select `Use another disc or disc image...` and click on `Continue`. Now select the downloaded Ubuntu ISO image and click on `Open`.
-
-![VMware Fusion Player Select ISO](Figs/vmware-fusion-player-select-iso.png)
-
-Now click on `Continue`. In the next screen, make sure that 2 CPUs and 4 GB of RAM are selected. Click on `Finish`.
-
-![VMware Fusion Player Finish](Figs/vmware-fusion-player-finish.png)
-
-The VM will be created and started. After the VM is started, click on `Try or insall Ubuntu`.
-
-![VMware Fusion Player Try or Install Ubuntu](Figs/vmware-fusion-player-try-or-install-ubuntu.png)
-
-You will be greeted with Ubuntu home screen. As this is the test environment you will have to click on the `Install Ubuntu` icon on the desktop.
-
-![Ubuntu Home Screen](Figs/ubuntu-home-screen.png)
-
-During Installation select Minimal Installation and click on `Continue`.
-
-![Ubuntu Installation](Figs/ubuntu-installation.png)
-
-In the next screen, select `Erase disk and install Ubuntu` and click on `Install Now`.
-
-![Ubuntu Installation](Figs/ubuntu-installation-erase.png)
-
-Create a user with name `seed` and password `dees` and click on `Continue`.
-
-![Ubuntu Installation](Figs/ubuntu-installation-user.png)
-
-The installation will start. After the installation is finished, click on `Restart Now`.
-
-If the is giving an error, just remove the ISO image from the VM and restart the VM. To do that go to `Virtual Machine` -> `Settings` -> `CD/DVD (SATA)` and uncheck `Connect CD/DVD Drive`. Click on `Apply` and `OK`. Now restart the VM.
-
-![Ubuntu Installation](Figs/ubuntu-installation-cd.png)
-
-Now you will be greeted with the home screen. Go to terminal download curl using ```sudo apt-get install curl``` and follow the setup instructions from step 2 in the [README](../../manuals/cloud/seedvm-cloud.md) file.
-
-### Step 3: Setup Docker and Docker Compose
-
-After done with the setup we have to set the docker default platform to linux/arm64. Go to terminal and type the following command.
-
-```export DOCKER_DEFAULT_PLATFORM=linux/arm64```
-
-Docker-compose is not available for arm64 architecture. So we have to install it manually. Go to terminal and type the following commands.
-
-```sudo curl -L "https://github.com/docker/compose/releases/download/v2.11.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose```
-
-```sudo chmod +x /usr/local/bin/docker-compose```
-
-Now you can use docker-compose in your VM.
+ - During the setup of VM we need to run a script in ```/src-cloud``` to install
+   the necessary software. The script will throw an error 
+   ```E: Package 'gcc-multilib' has no installation candidate```
+   as the package is not available for ARM architecture. 
+   This package is required for the compilation of 32-bit so it will cause
+   problem in the compilation of some labs. We will need to find a way to 
+   install this package.
 
 
 
+## Building Docker Images for ARM64 
+
+All our docker images were built for AMD64, so for each image, we need to build 
+one for ARM. To use the same tag for both AMD64 and ARM64, 
+we can use the multi-arch build approach.
+The following command actually builds three images, one for each platform.
+These images share the same tag. When users pull the image from the DockerHub, 
+they can pull one specific to their platform. See our script `build.sh`. 
+
+```
+docker buildx build --push \
+       --platform linux/arm64/v8,linux/amd64 \ 
+       --tag handsonsecurity/seed-ubuntu:large-multi  .
+```
 
 
+Note: for now, let's separate the `amd64` and `arm64` images;
+otherwise, we will have to rebuild all the images. 
+There is a concern that some of the software may end up using a 
+newer version, and might break some labs. Since most 
+users use the `amd64` images, to avoid any risk, we will 
+build separate images for `arm64` (appending `-arm` to 
+the image tag). When we upgrade the SEED VM to the next version, we 
+will switch to the multi-arch image, so the same image 
+names are used for both platforms. 
+
+
+
+## Lab Testing 
+
+We will conduct testing for each SEED lab. 
+The testing progress and results are described in 
+[Lab_Testing.md](./Lab_Testing.md).
 

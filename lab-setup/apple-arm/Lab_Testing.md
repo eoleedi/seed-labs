@@ -8,60 +8,67 @@ notes should be put inside the [Notes folder](./Notes).
 
 | Lab | Status | Notes |
 | --- | --- | --- |
-| Set-UID                   | no issue | fully tested |
-| Buffer-Overflow (setuid)  | ---  | Lab needs to be changed to support arm64 architecture |
-| Buffer-Overflow (server)  | ---  |  Lab needs to be changed to support arm64 architecture  |
-| Return-to-Libc   | ---  | Lab needs to be changed to support arm64 architecture  |
-| Format String   | --- | Lab needs to be changed to support arm64 architecture |
-| Race Condition  | no issue |     fully tested        |
-| Shellcode       | --- |                  |
-| Dirty Cow       | --- | will not port |
-| CSRF | no issue | tested the lab setup environment |
-| XSS | no issues | tested the lab setup environment |
-| SQL Injection | no issue | tested the lab setup environment |
-| Shellshock | no issue | tested the lab setup environment, see [notes](Notes/Shellshock.md) |
-| Clickjacking | no issue | tested the lab setup environment |
+| Set-UID                   | :thumbsup: | Fully tested |
+| Buffer-Overflow (setuid)  | :construction_worker:  | Lab needs to be revised for arm64 |
+| Buffer-Overflow (server)  | :construction_worker:  | Lab needs to be revised for arm64 |
+| Return-to-Libc  |      | Lab needs to be revised for arm64 |
+| Format String   |      | Lab needs to be revised for arm64 |
+| Shellcode       |     |  Lab needs to be revised for arm64 |
+| Dirty Cow       |  x  | Will not port |
+| Race Condition  | :thumbsup: |  Fully tested      |
+| CSRF            | :thumbsup: | Tested the lab setup |
+| XSS             | :thumbsup: | Tested the lab setup |
+| SQL Injection   | :thumbsup: | Tested the lab setup |
+| Shellshock      | :thumbsup: | Tested the lab setup: [notes](Notes/Shellshock.md) |
+| Clickjacking    | :thumbsup: | tested the lab setup |
 
 ## Network Security 
 
 | Lab | Status | Notes |
 | --- | --- | --- |
-| Sniffing/Spoofing | | |
-| ARP | | |
-| ICMP Redirect | | |
-| TCP | | |
-| Mitnick | | |
-| Firewall Exploration | | |
-| Firewall Evasion | | |
-| VPN Tunneling | | |
-| Heartbleed | --- | will not port |
-| DNS Local | | |
-| DNS Remote | | |
-| DNS Rebinding | | |
+| Sniffing/Spoofing | :thumbsup: | Fully tested; no issue |
+| ARP               | :thumbsup: | Fully tested; no issue |
+| ICMP Redirect     | | |
+| TCP               | :thumbsup: | Fully tested; minor issue: [notes](Notes/Network_Security.md)|
+| Mitnick           | :thumbsup: | Fully tested; no issue |
+| Firewall Exploration | :thumbsup: | Fully tested; no issue: [notes](Notes/Network_Security.md) |
+| Firewall Evasion  | :thumbsup: | Full tested; no issue  |
+| VPN Tunneling     | :thumbsup: | Fully tested; no issue |
+| Heartbleed        | x          | Will not port          |
+| DNS Local         | :thumbsup: | Fully tested; no issue |
+| DNS Remote        | :question: | See [notes](Notes/Network_Security.md) |
+| DNS Rebinding     | :thumbsup: | Fully tested; minor issues: [notes](Notes/Network_Security.md) |
 | DNS Infrastructure | | |
 | DNSSEC | | |
-| BGP | | |
-| Morris Worm | | |
+| BGP | :thumbsup: | Full tested; no issue |
+| Morris Worm | :construction_worker: | See [notes](Notes/Network_Security.md) |
 
 ## Crypto Lab 
 
 | Lab | Status | Notes |
 | --- | --- | --- |
-| Secret-Key Encryption | | The openssl library is compiled successfully |
-| Padding Oracle | | |
-| Hash Collision | | The program md5collgen is compiled successfully |
-| Hash Length Extension | | |
-| Random Number | | |
-| RSA Public Key | | The program compiled successfully |
-| PKI | | |
-| TLS | | |
+| Secret-Key Encryption | :thumbsup: | Fully tested; no issue |
+| Padding Oracle | :question: | The docker image needs to be built |
+| Hash Collision | :thumbsup: | Fully tested; no issue: See [notes](Notes/Crypto.md) |
+| Hash Length Extension | :thumbsup: | Fully tested; no issue: See [notes](Notes/Crypto.md) |
+| Random Number | :construction_worker: | Lab needs to be modified. See [notes](Notes/Crypto.md) |
+| RSA Public Key | :thumbsup: | Fully tested; no issue |
+| PKI | :thumbsup: | Fully tested; no issue |
+| TLS | :thumbsup: | Tested the client and server; no issue |
+
+
+## Blockchain
+
+| Lab | Status | Notes |
+| --- | --- | --- |
+| Blockchain Exploration | :thumbsup: | Fully tested; no issue |
+| Smart Contract Lab | :thumbsup: | Fully tested; no issue |
+| Blockchain: Reentrancy | | | 
 
 
 ## Others
 
 | Lab | Status | Notes |
 | --- | --- | --- |
-| Blockchain: Reentrancy | | | 
-| Meltdown | | will not port | 
-| Spectre  | | will not port | 
-| | | | 
+| Meltdown | x | Will not port | 
+| Spectre  | x | Will not port | 

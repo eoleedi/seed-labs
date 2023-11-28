@@ -2,13 +2,34 @@
 # encoding: utf-8
 
 from seedemu import *
-from typing import List, Tuple, Dict
 
+def makeStubAs(emu: Emulator, base: Base, asn: int, exchange: int, hosts_total: int):
+    # Create AS and internal network
+    network = "net0"
+    stub_as = base.createAutonomousSystem(asn)
+    stub_as.createNetwork(network)
+
+    # Create a BGP router
+    # Attach the router to both the internal and external networks
+    router = stub_as.createRouter('router0')
+    router.joinNetwork(network)
+    router.joinNetwork('ix{}'.format(exchange))
+
+    for counter in range(hosts_total):
+       name = 'host_{}'.format(counter)
+       host = stub_as.createHost(name)
+       host.joinNetwork(network)
+
+
+
+hosts_total = 3
 
 ###############################################################################
 emu     = Emulator()
 base    = Base()
+routing = Routing()
 ebgp    = Ebgp()
+ibgp    = Ibgp()
 web     = WebService()
 
 
@@ -26,7 +47,7 @@ ix100.getPeeringLan().setDisplayName('NYC-100')
 ix101.getPeeringLan().setDisplayName('San Jose-101')
 ix102.getPeeringLan().setDisplayName('Chicago-102')
 ix103.getPeeringLan().setDisplayName('Miami-103')
-ix104.getPeeringLan().setDisplayName('Boston-104')
+ix104.getPeeringLan().setDisplayName('Toronto-104')
 ix105.getPeeringLan().setDisplayName('Huston-105')
 
 
@@ -57,53 +78,27 @@ Makers.makeTransitAs(base, 12, [101, 104], [(101, 104)])
 
 
 ###############################################################################
-# Create single-homed stub ASes. "None" means create a host only 
+# Create single-homed stub ASes. 
 
-Makers.makeStubAs(emu, base, 150, 100, [web, None])
-# Add a shared folder to AS-150's BGP router (need it for the experiment)
-#as150 = base.getAutonomousSystem(150)
-#as150.getRouter('router0').addSharedFolder('/volumes', './volumes')
+makeStubAs(emu, base, 150, 100, hosts_total)
+makeStubAs(emu, base, 151, 100, hosts_total)
 
+makeStubAs(emu, base, 152, 101, hosts_total)
+makeStubAs(emu, base, 153, 101, hosts_total)
 
-Makers.makeStubAs(emu, base, 151, 100, [web, None])
+makeStubAs(emu, base, 154, 102, hosts_total)
+makeStubAs(emu, base, 155, 102, hosts_total)
+makeStubAs(emu, base, 156, 102, hosts_total)
 
-Makers.makeStubAs(emu, base, 152, 101, [None, None])
-Makers.makeStubAs(emu, base, 153, 101, [web, None, None])
+makeStubAs(emu, base, 160, 103, hosts_total)
+makeStubAs(emu, base, 161, 103, hosts_total)
+makeStubAs(emu, base, 162, 103, hosts_total)
 
-Makers.makeStubAs(emu, base, 154, 102, [None, web])
-Makers.makeStubAs(emu, base, 155, 102, [None, web])
-Makers.makeStubAs(emu, base, 156, 102, [None, web])
+makeStubAs(emu, base, 163, 104, hosts_total)
+makeStubAs(emu, base, 164, 104, hosts_total)
 
-Makers.makeStubAs(emu, base, 160, 103, [web, None])
-Makers.makeStubAs(emu, base, 161, 103, [web, None])
-Makers.makeStubAs(emu, base, 162, 103, [web, None])
-
-Makers.makeStubAs(emu, base, 163, 104, [web, None])
-Makers.makeStubAs(emu, base, 164, 104, [None, None])
-
-Makers.makeStubAs(emu, base, 170, 105, [web, None])
-Makers.makeStubAs(emu, base, 171, 105, [None])
-
-# This stub AS is for lab exercise. Its setup is incomplete
-Makers.makeStubAs(emu, base, 180, 105, [web, None])
-
-
-###############################################################################
-# This stub AS is for IP anycast
-# Create a new AS with two disjoint networks, but the
-# IP prefix of these two networks are the same.
-as190 = base.createAutonomousSystem(190)
-as190.createNetwork('net0', '10.190.0.0/24')
-as190.createNetwork('net1', '10.190.0.0/24')
-
-# Create a host on each network, but assign them the same IP address
-as190.createHost('host-0').joinNetwork('net0', address = '10.190.0.100')
-as190.createHost('host-1').joinNetwork('net1', address = '10.190.0.100')
-
-# Attach one network to IX-100 and the other to IX-105 (via BGP router)
-as190.createRouter('router0').joinNetwork('net0').joinNetwork('ix100')
-as190.createRouter('router1').joinNetwork('net1').joinNetwork('ix105')
-
+makeStubAs(emu, base, 170, 105, hosts_total)
+makeStubAs(emu, base, 171, 105, hosts_total)
 
 
 ###############################################################################
@@ -141,25 +136,21 @@ ebgp.addPrivatePeerings(104, [12], [164], PeerRelationship.Provider)
 ebgp.addPrivatePeerings(105, [3],  [11, 170], PeerRelationship.Provider)
 ebgp.addPrivatePeerings(105, [11], [171], PeerRelationship.Provider)
 
-# AS-190 is for the IP anycast task
-ebgp.addPrivatePeerings(100, [4],  [190], PeerRelationship.Provider)
-ebgp.addPrivatePeerings(105, [3],  [190], PeerRelationship.Provider)
-
 
 ###############################################################################
 
 # Add layers to the emulator
 emu.addLayer(base)
-emu.addLayer(Routing())
+emu.addLayer(routing)
 emu.addLayer(ebgp)
-emu.addLayer(Ibgp())
+emu.addLayer(ibgp)
 emu.addLayer(Ospf())
 emu.addLayer(web)
 
 # Save it to a component file, so it can be used by other emulators
-#emu.dump('base-component.bin')
+emu.dump('base-component.bin')
 
-emu.render()
-docker = Docker(selfManagedNetwork=True, internetMapEnabled=True)
-emu.compile(docker, './output', override = True)
+#emu.render()
+#docker = Docker(internetMapEnabled=True)
+#emu.compile(docker, './emulators/mini-internet', override = True)
 
